@@ -1,0 +1,32 @@
+
+
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4fc;">
+    <div style="background-color: white; padding: 40px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); width: 350px;">
+        <h2 style="text-align: center; font-size: 24px; color: #333; margin-bottom: 20px;">Sign In</h2>
+        <form method="POST" action="{{ url_for('signin') }}" style="display: flex; flex-direction: column; gap: 15px;">
+            <!-- Email Field -->
+            <label for="email" style="font-size: 14px; color: #555;">Email:</label>
+            <input type="email" name="email" id="email" placeholder="Enter your email" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;">
+            
+            <!-- Password Field -->
+            <label for="password" style="font-size: 14px; color: #555;">Password:</label>
+            <input type="password" name="password" id="password" placeholder="Enter your password" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;">
+            
+            <!-- Submit Button -->
+            <button type="submit" style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s;">
+                Sign In
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div style="margin-top: 20px; text-align: center;">
+            <p style="font-size: 14px; color: #555;">New User? 
+                <a href="{{ url_for('signup') }}" style="color: #007bff; text-decoration: none;">Sign Up</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

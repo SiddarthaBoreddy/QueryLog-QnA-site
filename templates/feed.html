@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; height: 100vh; background-color: #f4f4f9;">
+    <!-- Left Sidebar -->
+    <div style="width: 20%; padding-right: 20px; border-right: 1px solid #ccc; overflow-y: auto;max-height: calc(100vh - 40px);  background-color: linear-gradient(135deg, #ffffff, #f0f0f5); border-radius: 12px; padding: 20px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);font-family: 'Arial', sans-serif;">
+        <h3 style="color: #007bff; margin-bottom: 15px; font-size: 20px;font-weight: bold; text-align: center; text-transform: uppercase;">Categories</h3>
+        <ul style="list-style-type: none; padding-left: 0;font-size: 16px;line-height: 1.8;">
+            {% for category in categories %}
+                <li style="margin-bottom: 10px;">
+                    <a href="{{ url_for('feed', category=category.id) }}" style="color: #555; font-size: 16px; text-decoration: none;transition: color 0.3s ease;">{{ category.name }}</a>
+                    <ul>
+                        {% for subcategory in category.subcategories %}
+                            <li style="margin-left: 15px;"><a href="{{ url_for('feed', category=category.id, subcategory=subcategory.id) }}" style="color: #666; font-size: 14px; text-decoration: none;transition: color 0.3s ease;">{{ subcategory.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+
+    <!-- Feed Content -->
+    <div style="width: 60%; padding: 20px; overflow-y: scroll; background-color: linear-gradient(135deg, #ffffff, #f8f9fc); border-radius: 12px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);font-family: 'Arial', sans-serif;">
+        <h2 style="color: #2c3e50; margin-bottom: 20px;font-size: 24px; font-weight: bold;text-align: center;">Feed</h2>
+        <div style="margin-bottom: 20px;">
+            <label for="filter">Filter Questions:</label>
+            <select id="filter" onchange="applyFilter()" style="padding: 5px; border-radius: 5px;">
+                <option value="newest" {% if filter_type == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="answers" {% if filter_type == 'answers' %}selected{% endif %}>With Answers</option>
+                <option value="unanswered" {% if filter_type == 'unanswered' %}selected{% endif %}>Unanswered</option>
+            </select>
+        </div>
+        {% if questions %}
+            {% for question in questions %}
+                <div style="margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); background: #ffffff; transition: transform 0.2s, box-shadow 0.2s;">
+                    <h4 style="color: #34495e; margin-bottom: 10px; font-size: 20px; font-weight: bold;">{{ question.title }}</h4>
+                    <p style="font-size: 15px; line-height: 1.8; color: #7f8c8d;">{{ question.question_text }}</p>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <small style="font-size: 13px; color: #95a5a6;">Asked by: {{ question.user.first_name if question.user else 'Unknown User' }}</small>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button onclick="openModal('answer', {{ question.id }}, '{{ question.question_text | escapejs }}')" style="font-size: 14px; background-color: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; margin-right: 10px; transition: background-color 0.3s;">🖋️ Answer</button>
+                        <button onclick="toggleComments({{ question.id }})" style="font-size: 14px; background-color: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s;">💬 Comments</button>
+                        <a href="{{ url_for('show_answers', question_id=question.id) }}" style="font-size: 14px; color: #2980b9; text-decoration: none; margin-left: 10px;transition: color 0.3s;">{{ question.answers|length }} {{ 'Answer' if question.answers|length == 1 else 'Answers' }}</a>
+                    </div>
+                    <div id="comments-{{ question.id }}" style="display: none; margin-top: 10px; padding: 15px; border-top: 1px solid #ccc; background-color: #ecf0f1; border-radius: 8px;">
+                        <form method="POST" action="{{ url_for('post_comment') }}" style="margin-bottom: 20px;">
+                            <input type="hidden" name="question_id" value="{{ question.id }}">
+                            <textarea name="comment" placeholder="Write a comment..." rows="2" style="width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 14px; resize: none;" required></textarea>
+                            <button type="submit" style=" margin-top: 10px; padding: 10px 20px; background-color: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer;transition: background-color 0.3s;">Post Comment</button>
+                        </form>
+                        {% if question.comments %}
+                            {% for comment in question.comments if not comment.parent_comment_id %}
+                                <div style="margin-bottom: 15px; padding: 15px; background: linear-gradient(135deg, #ffffff, #f8f8fb); border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transition: transform 0.2s, box-shadow 0.2s;">
+                                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                        <img src="{{ comment.user.profile_picture if comment.user.profile_picture else '/static/default-user.png' }}" alt="User Image" style="width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; border: 3px solid #ecf0f1; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                                        <strong style="font-size: 15px; color: #34495e;">{{ comment.user.first_name if comment.user else 'Unknown User' }}</strong>
+                                    </div>
+                                    <p style="font-size: 14px; margin: 0; line-height: 1.8; color: #7f8c8d;">{{ comment.comment_text }}</p>
+                                    <button onclick="showReplyForm({{ comment.id }})" style="margin-top: 12px; font-size: 13px; color: #3498db; background: none; border: none; cursor: pointer; text-decoration: underline; ">Reply</button>
+                                    <form id="reply-form-{{ comment.id }}" method="POST" action="{{ url_for('reply_to_comment') }}" style="display: none; margin-top: 10px;">
+                                        <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
+                                        <input type="hidden" name="question_id" value="{{ question.id }}">
+                                        <textarea name="reply" placeholder="Write a reply..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" required></textarea>
+                                        <button type="submit" 
+                                                style="margin-top: 10px; padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                            Post Reply
+                                        </button>
+                                    </form>
+                                    {% if comment.replies %}
+                                        <div style=" margin-top: 20px; padding-left: 20px; border-left: 3px solid #bdc3c7;">
+                                            {% for reply in comment.replies %}
+                                                <div style="margin-bottom: 12px; padding: 15px; background: #ffffff; border-radius: 12px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); ">
+                                                    <div style="display: flex; align-items: center;  margin-bottom: 10px;">
+                                                        <img src="{{ reply.user.profile_picture if reply.user.profile_picture else '/static/default-user.png' }}" alt="User Image" style="width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; border: 2px solid #ecf0f1; ">
+                                                        <strong style="font-size: 14px; color: #34495e;">{{ reply.user.first_name if reply.user else 'Unknown User' }}</strong>
+                                                    </div>
+                                                    <p style="font-size: 13px; margin: 0; line-height: 1.6; color: #7f8c8d;">{{ reply.comment_text }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Right Sidebar -->
+    <div style="overflow-y: scroll;width: 20%; padding-left: 20px; border-left: 2px solid #e0e0e0; background: linear-gradient(135deg, #ffffff, #f9f9f9); border-radius: 12px; padding: 25px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); transition: box-shadow 0.3s, transform 0.3s;">
+        <div style="margin-bottom: 25px;">
+            <h3 style="color: #007bff; font-size: 20px;  font-weight: 600; margin-bottom: 15px; border-bottom: 2px solid #007bff; padding-bottom: 5px;">Live Sessions</h3>
+            {% if live_sessions %}
+                <ul style="list-style-type: none; padding: 0; margin: 0;">
+                    {% for session in live_sessions %}
+                        <li style="margin-bottom: 15px; padding: 10px; background: #ffffff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  transition: transform 0.3s, box-shadow 0.3s;">
+                            <a href="{{ url_for('live_session_details', session_id=session.id) }}" style="text-decoration: none; color: #007bff; font-size: 16px; font-weight: 500;">{{ session.topic }}</a>
+                            <br>
+                            <small style="color: #888; font-size: 14px;">Date: {{ session.date }} | Time: {{ session.time }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color: #888; font-size: 14px;  text-align: center;  background: #f4f4f4;  padding: 10px; border-radius: 8px; ">No upcoming live sessions.</p>
+            {% endif %}
+        </div>
+        <div style="background: linear-gradient(135deg, #ffffff, #f7f7f7); border-radius: 12px; padding: 25px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s, box-shadow 0.3s;">
+            <h3 style="color: #007bff; font-size: 20px; font-weight: 600; margin-bottom: 15px; border-bottom: 2px solid #007bff; padding-bottom: 5px;">This Week #Tags</h3>
+            {% if top_keywords %}
+                <ul style="list-style-type: none; padding: 0; margin: 0;">
+                    {% for hashtag in top_keywords %}
+                        <li style="margin: 10px 0; font-size: 14px; padding: 8px 12px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);transition: transform 0.3s, box-shadow 0.3s;">
+                            <a href="#" style="color: #007bff; text-decoration: none; font-weight: 500; font-size: 14px;">{{ hashtag }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color: #888; font-size: 14px; text-align: center;  background: #f4f4f4; padding: 10px; border-radius: 8px;">No trending hashtags this week.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Answer/Comment -->
+<!-- Modal for Answer/Comment -->
+<div id="modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #ffffff, #f7f7f7); border-radius: 12px; padding: 30px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); width: 40%; max-width: 500px;">
+    <h4 id="modal-question-text" style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 20px; border-bottom: 2px solid #007bff; padding-bottom: 8px;"></h4>
+    <form id="modal-form" method="POST" action="{{ url_for('feed') }}">
+        <input type="hidden" id="modal-question-id" name="question_id">
+        <input type="hidden" id="modal-action" name="action">
+        <textarea id="modal-textarea" rows="3" style="width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-size: 14px; resize: none; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);"></textarea>
+        <br>
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <button type="submit" style="background-color: #007bff; color: white; border: none; border-radius: 5px; padding: 10px 20px; font-size: 14px; cursor: pointer; transition: background-color 0.3s;">Submit</button>
+            <button type="button" onclick="closeModal()" style="background-color: #ddd; color: #555; border: none; border-radius: 5px; padding: 10px 20px; font-size: 14px; cursor: pointer; transition: background-color 0.3s;">Cancel</button>
+        </div>
+    </form>
+</div>
+<script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const buttons = document.querySelectorAll(".answer-btn");
+            buttons.forEach((button) => {
+                button.addEventListener("click", (e) => {
+                    const action = button.getAttribute("data-action");
+                    const questionId = button.getAttribute("data-question-id");
+                    const questionText = button.getAttribute("data-question-text");
+
+                    openModal(action, questionId, questionText);
+                });
+            });
+        });
+    // function openModal(action, questionId, questionText) {
+    //     const modal = document.getElementById('modal');
+    //     const modalForm = document.getElementById('modal-form');
+    //     const modalTextarea = document.getElementById('modal-textarea');
+
+
+    //     document.getElementById('modal-question-text').textContent = sanitizedText;
+    //     document.getElementById('modal-question-id').value = questionId;
+    //     document.getElementById('modal-action').value = action;
+    //     document.getElementById('modal-textarea').placeholder = action === 'answer' ? 'Type your answer here...' : 'Type your comment here...';
+
+    //     modalTextarea.name = action === 'answer' ? 'answer' : 'comment';
+    //     modalTextarea.placeholder = action === 'answer' ? 'Type your answer here...' : 'Type your comment here...';
+
+    //     modal.style.display = 'block';
+    // }
+    function openModal(action, questionId, questionText) {
+        console.log("openModal called with:", { action, questionId, questionText });
+        const modal = document.getElementById('modal');
+        const modalForm = document.getElementById('modal-form');
+        const modalTextarea = document.getElementById('modal-textarea');
+        const questionIdInput = document.getElementById('modal-question-id');
+        console.log({ modal, modalForm, modalTextarea, questionIdInput });
+        if (!questionIdInput) {
+            console.error("The element #modal-question-id does not exist or is null.");
+            return;
+        }
+
+        if (questionIdInput.readOnly || questionIdInput.disabled) {
+            console.error("#modal-question-id is read-only or disabled.");
+            return;
+        }
+
+
+
+        if (!modal || !modalForm || !modalTextarea || !questionIdInput) {
+            console.error("One or more modal elements are missing from the DOM.");
+            return;
+        }
+
+        document.getElementById('modal-question-text').textContent = questionText;
+        questionIdInput.value = questionId;
+        document.getElementById('modal-question-id').value = questionId;
+        if (!questionIdInput) {
+            console.error("Input element for question ID is missing.");
+            return;
+         }
+        document.getElementById('modal-action').value = action;
+        document.getElementById('modal-textarea').placeholder = action === 'answer' ? 'Type your answer here...' : 'Type your comment here...';
+
+        modalTextarea.name = action; // Set textarea name dynamically based on action
+        modalTextarea.placeholder = action === 'answer' ? 'Type your answer here...' : 'Type your comment here...';
+
+        modal.style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    function toggleComments(questionId) {
+        const commentBox = document.getElementById(`comments-${questionId}`);
+        if (commentBox.style.display === "none" || commentBox.style.display === "") {
+            commentBox.style.display = "block";
+        } else {
+            commentBox.style.display = "none";
+        }
+    }
+
+    function showReplyForm(commentId) {
+        const form = document.getElementById(`reply-form-${commentId}`);
+        form.style.display = form.style.display === "none" || form.style.display === "" ? "block" : "none";
+    }
+    function applyFilter() {
+        const filter = document.getElementById('filter').value;
+        window.location.href = `?filter=${filter}`;
+    }
+</script>
+{% endblock %}

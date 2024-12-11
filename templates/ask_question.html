@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 600px; margin: 50px auto; background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);">
+    <h2 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 20px; border-bottom: 2px solid #007bff; padding-bottom: 10px;">Ask a Question</h2>
+    <form method="POST" action="{{ url_for('ask_question') }}">
+        <input type="text" name="title" placeholder="Question Title" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);" required>
+        <textarea name="question" placeholder="Type your question here..." rows="4" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);" required></textarea>
+        <select name="category" id="category" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background-color: #f9f9f9;" onchange="filterSubcategories()" required>
+            <option value="">Select Category</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="subcategory" id="subcategory" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background-color: #f9f9f9;" required>
+            <option value="">Select Subcategory</option>
+            {% for subcategory in subcategories %}
+            <option value="{{ subcategory.id }}" data-category="{{ subcategory.category_id }}">{{ subcategory.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" style="width: 100%; padding: 12px; background-color: #007bff; color: white; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s;">Submit</button>
+    </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-top: 20px; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+        {% for category, message in messages %}
+        <div style="color:green; font-size: 14px; font-weight: bold; margin-bottom: 10px;">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+</div>
+<script>
+    function filterSubcategories() {
+        const categoryId = document.getElementById('category').value;
+        const subcategoryDropdown = document.getElementById('subcategory');
+        const options = subcategoryDropdown.querySelectorAll('option');
+        options.forEach(option => {
+            if (option.getAttribute('data-category') === categoryId || option.value === "") {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        subcategoryDropdown.value = "";
+    }
+</script>
+{% endblock %}

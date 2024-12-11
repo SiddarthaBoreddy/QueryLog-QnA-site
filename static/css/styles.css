@@ -1,0 +1,32 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background: #333;
+    color: white;
+    padding: 1rem;
+}
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.navbar nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 1rem;
+}
+.navbar nav a.btn {
+    background: #007BFF;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+}
+main {
+    padding: 2rem;
+}
+.welcome-section, .ask-question-form, .question-detail {
+    margin: 2rem 0;
+}

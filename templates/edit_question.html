@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Question</title>
+</head>
+<body>
+    <h2>Edit Question</h2>
+    <form method="POST">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" value="{{ question.title }}" required><br><br>
+
+        <label for="question_text">Question</label>
+        <textarea id="question_text" name="question_text" required>{{ question.question_text }}</textarea><br><br>
+
+        <label for="category">Category</label>
+        <select id="category" name="category" required>
+            {% for category in categories %}
+            <option value="{{ category.name }}" {% if category.name == question.category %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="subcategory">Subcategory</label>
+        <select id="subcategory" name="subcategory" required>
+            {% for subcategory in subcategories %}
+            <option value="{{ subcategory.name }}" {% if subcategory.name == question.subcategory %}selected{% endif %}>{{ subcategory.name }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+</body>
+</html>

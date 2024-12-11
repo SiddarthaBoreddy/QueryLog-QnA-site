@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
+    <h2 style="color: #2c3e50; font-size: 28px; margin-bottom: 20px;">Brainstorming Rooms</h2>
+
+    <!-- Room Creation Form -->
+    <div style="width: 100%; max-width: 600px; margin-bottom: 30px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+        <h3 style="margin-bottom: 15px; font-size: 22px; color: #2c3e50;">Create a New Room</h3>
+        <form method="POST" action="{{ url_for('create_room') }}">
+            <div style="margin-bottom: 15px;">
+                <label for="room_name" style="font-size: 16px; font-weight: bold;">Room Name:</label>
+                <input type="text" id="room_name" name="room_name" placeholder="Enter room name" required
+                       style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-size: 16px; font-weight: bold;">
+                    <input type="checkbox" name="is_private" value="true" style="margin-right: 5px;"> Private Room
+                </label>
+            </div>
+            <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">Create Room</button>
+        </form>
+    </div>
+
+    <!-- Rooms List -->
+    <div style="width: 100%; max-width: 800px;">
+        <h3 style="margin-bottom: 15px; font-size: 22px; color: #2c3e50;">Available Rooms</h3>
+        {% if rooms %}
+            <ul style="list-style-type: none; padding: 0;">
+                {% for room in rooms %}
+                <li style="margin-bottom: 10px; padding: 15px; background-color: #f9f9f9; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: 18px; color: #2c3e50;">{{ room.name }}</strong>
+                            {% if room.is_private %}
+                            <span style="font-size: 14px; color: #e74c3c; margin-left: 10px;">(Private)</span>
+                            {% endif %}
+                        </div>
+                        {% if room.is_private and session['user_id'] != room.created_by %}
+                            <button disabled style="background-color: gray;">Restricted</button>
+                        {% else %}
+                            <a href="{{ url_for('room', room_id=room.id) }}" style="text-decoration: none; background-color: #007bff; color: white; padding: 10px 15px; border-radius: 5px; font-size: 14px; transition: background-color 0.3s; text-align: center;">Join Room</a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="font-size: 16px; color: #888;">No rooms available. Create a new room to get started!</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

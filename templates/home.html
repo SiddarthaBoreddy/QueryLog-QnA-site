@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>Welcome to the QnA Platform!</h2>
+    <p>Browse questions or ask your own.</p>
+</div>
+<div class="feed-section">
+    <h3>Latest Questions</h3>
+    <div id="questions-feed">
+        {% for question in questions %}
+        <div class="question-card">
+            <h4>{{ question.title }}</h4>
+            <p>{{ question.description }}</p>
+            <a href="/question/{{ question.id }}">View Question</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

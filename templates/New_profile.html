@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Profile</h2>
+    <div style="margin-bottom: 20px;">
+        <h3>{{ profile.name }}</h3>
+        <p>Email: {{ profile.email }}</p>
+        <p>Joined: {{ profile.joined_date }}</p>
+    </div>
+
+    <h3>Your Questions</h3>
+    <table border="1" style="width: 100%; margin-top: 20px;">
+        <tr>
+            <th>Question ID</th>
+            <th>Question Title</th>
+            <th>Question Text</th>
+        </tr>
+        {% for question in questions.items %}
+        <tr>
+            <td>{{ question.id }}</td>
+            <td>{{ question.title }}</td>
+            <td>{{ question.question_text }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div>
+        <a href="{{ url_for('profile', page=questions.prev_num) }}" {% if not questions.has_prev %}class="disabled"{% endif %}>Previous</a>
+        <a href="{{ url_for('profile', page=questions.next_num) }}" {% if not questions.has_next %}class="disabled"{% endif %}>Next</a>
+    </div>
+{% endblock %}

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QnA Platform</title>
+    <style>
+        /* General body styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Navigation bar styling */
+        .navbar {
+            background-color: black;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+            color: #f0f0f0;
+        }
+
+        /* Dropdown menu styling */
+        .user-menu {
+            position: relative;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .user-menu:hover .dropdown {
+            display: block;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .dropdown a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .dropdown a:hover {
+            background-color: #f7f7f7;
+        }
+
+        /* Flash message styling */
+        .alert {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Content container */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar" style="display: flex; align-items: center;">
+        <div>
+            <h1 style="margin: 0; font-size: 24px; color: white; font-weight: bold; margin-right: 20px;">
+                QueryLog
+            </h1>
+            <a>Explore. Engage. Enlighten.</a>
+        </div>
+        <div>
+            <a href="{{ url_for('feed') }}">Home</a>
+            <a href="{{ url_for('ask_question') }}">Ask Question</a>
+            <a href="{{ url_for('schedule_live_session') }}">Schedule Live Session</a>
+            <a href="{{ url_for('rooms') }}">Brainstorming Rooms</a>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 15px;"> 
+
+        <a href="{{ url_for('notifications') }}" style="position: relative;">
+            🛎️
+            {% if unread_notifications_count > 0 %}
+                <span style="position: absolute; top: 0; right: 0; background: red; color: white; 
+                             border-radius: 50%; padding: 3px 7px; font-size: 12px;">
+                    {{ unread_notifications_count }}
+                </span>
+            {% endif %}
+
+        </a>
+            {% if session.get('user_id') %}
+                <div class="user-menu">
+                    {{ session['first_name'] }}
+                    <div class="dropdown">
+                        <a href="{{ url_for('profile') }}">Profile</a>
+                        <a href="{{ url_for('signout') }}">Sign Out</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ url_for('signin') }}" style="color: white; text-decoration: none;">Sign In</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer style="background-color: #2c3e50; color: white; padding: 20px 0; margin-top: 20px; font-family: 'Arial', sans-serif;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; flex-wrap: wrap;">
+            <!-- Contact Us Section -->
+            <div style="flex: 1; margin-bottom: 20px;">
+                <h3 style="color: #ecf0f1; font-size: 18px; font-weight: bold; margin-bottom: 10px;">Contact Us</h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li><a href="https://www.linkedin.com" target="_blank" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">LinkedIn</a></li>
+                    <li><a href="https://twitter.com" target="_blank" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Twitter</a></li>
+                    <li><a href="https://instagram.com" target="_blank" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Instagram</a></li>
+                </ul>
+            </div>
+            
+            <!-- Careers Section -->
+            <div style="flex: 1; margin-bottom: 20px;">
+                <h3 style="color: #ecf0f1; font-size: 18px; font-weight: bold; margin-bottom: 10px;">Careers</h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Open Positions</a></li>
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Internships</a></li>
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Life at QnA</a></li>
+                </ul>
+            </div>
+            
+            <!-- Resources Section -->
+            <div style="flex: 1; margin-bottom: 20px;">
+                <h3 style="color: #ecf0f1; font-size: 18px; font-weight: bold; margin-bottom: 10px;">Resources</h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Help Center</a></li>
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Developer API</a></li>
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Guides</a></li>
+                </ul>
+            </div>
+            
+            <!-- FAQ Section -->
+            <div style="flex: 1; margin-bottom: 20px;">
+                <h3 style="color: #ecf0f1; font-size: 18px; font-weight: bold; margin-bottom: 10px;">FAQ</h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">General Questions</a></li>
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Account Issues</a></li>
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Payment Support</a></li>
+                </ul>
+            </div>
+            
+            <!-- Subscription Section -->
+            <div style="flex: 1; margin-bottom: 20px;">
+                <h3 style="color: #ecf0f1; font-size: 18px; font-weight: bold; margin-bottom: 10px;">Subscription</h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Pricing Plans</a></li>
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Corporate Plans</a></li>
+                    <li><a href="{{ url_for('feed') }}" style="color: #bdc3c7; text-decoration: none; font-size: 14px;">Student Offers</a></li>
+                </ul>
+            </div>
+        </div>
+        <div style="text-align: center; color: #bdc3c7; margin-top: 20px; font-size: 14px;">
+            © 2024 QnA Platform. All Rights Reserved.
+        </div>
+    </footer>
+</body>
+</html>

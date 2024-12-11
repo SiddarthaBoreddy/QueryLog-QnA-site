@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="margin: 20px auto; max-width: 800px; background-color: #f9f9fc; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+    <h2 style="font-size: 24px; color: #007bff; margin-bottom: 10px; text-align: center;">Answers for: "{{ question.title }}"</h2>
+    <p style="font-size: 16px; color: #555; margin-bottom: 20px; text-align: center;">{{ question.question_text }}</p>
+    
+    <h3 style="font-size: 20px; color: #333; margin-bottom: 15px;">Answers:</h3>
+    {% if answers|length == 0 %}
+        <p style="font-size: 16px; color: #888;">No answers have been posted for this question yet.</p>
+    {% else %}
+        {% for answer in answers %}
+            <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #ffffff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                <small style="font-size: 14px; color: #555;">By: {{ answer.user.first_name if answer.user else 'Unknown' }}</small>
+                <p style="font-size: 16px; color: #333; margin: 10px 0;">{{ answer.answer_text }}</p>
+                <small style="font-size: 14px; color: #888;">Upvotes: {{ answer.upvotes }} | Downvotes: {{ answer.downvotes }}</small>
+                <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+                    {% set user_vote = user_votes.get(answer.id) %}
+                    <form method="POST" action="{{ url_for('vote') }}" style="display: inline;">
+                        <input type="hidden" name="answer_id" value="{{ answer.id }}">
+                        <input type="hidden" name="vote_type" value="upvote">
+                        <button type="submit" 
+                                style="background-color: {% if user_vote == 'upvote' %} #218838 {% else %} #28a745 {% endif %}; 
+                                       color: white; 
+                                       border: none; 
+                                       padding: 8px 12px; 
+                                       border-radius: 5px; 
+                                       cursor: pointer; 
+                                       font-size: 14px;">
+                                👍 {% if user_vote == 'upvote' %} Voted {% else %} Upvote {% endif %}
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('vote') }}" style="display: inline;">
+                        <input type="hidden" name="answer_id" value="{{ answer.id }}">
+                        <input type="hidden" name="vote_type" value="downvote">
+                        <button type="submit" 
+                                style="background-color: {% if user_vote == 'downvote' %} #C82333 {% else %} #DC3545 {% endif %}; 
+                                       color: white; 
+                                       border: none; 
+                                       padding: 8px 12px; 
+                                       border-radius: 5px; 
+                                       cursor: pointer; 
+                                       font-size: 14px;">
+                                👎 {% if user_vote == 'downvote' %} Voted {% else %} Downvote {% endif %}
+                        </button>
+                    </form>
+                    <div id="vote-message-{{ answer.id }}" 
+                         style="font-size: 12px; color: {% if user_vote == 'downvote' %} #dc3545 {% else %} #28a745 {% endif %}; 
+                                margin-left: 10px; display: none;">
+                        {% if user_vote == 'upvote' %}
+                            You upvoted!
+                        {% elif user_vote == 'downvote' %}
+                            You downvoted!
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<script>
+    function toggleComments(commentId) {
+        const commentBox = document.getElementById(`comments-${commentId}`);
+        if (commentBox.style.display === "none" || commentBox.style.display === "") {
+            commentBox.style.display = "block";
+        } else {
+            commentBox.style.display = "none";
+        }
+    }
+    // Ensure the comment box remains open if specified
+    window.onload = function() {
+        const openCommentsId = "{{ open_comments }}";
+        if (openCommentsId) {
+            const commentBox = document.getElementById(`comments-${openCommentsId}`);
+            if (commentBox) {
+                commentBox.style.display = "block";
+            }
+        }
+    };
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const voteMessages = document.querySelectorAll('[id^="vote-message-"]');
+        voteMessages.forEach(message => {
+            if (message.textContent.trim() !== "") {
+                message.style.display = 'block';
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 3000); // Message disappears after 3 seconds
+            }
+        });
+    });
+</script>
+{% endblock %}

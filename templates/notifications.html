@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <style>
+        .notification-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .notification-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        .notification-item a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .notification-item a:hover {
+            text-decoration: underline;
+        }
+        .notification-item small {
+            color: #888;
+        }
+        .read {
+            background: #f9f9f9;
+        }
+        button.mark-as-read {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button.mark-as-read:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification-container">
+        <form method="POST" action="{{ url_for('mark_all_notifications_read') }}" style="margin-bottom: 20px;">
+            <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
+                Mark All as Read
+            </button>
+        </form>
+        {% if notifications %}
+            {% for notification in notifications %}
+                <div class="notification-item {% if notification.is_read %}read{% endif %}">
+                    <a href="{{ url_for('show_answers', question_id=notification.question_id) }}">
+                        {{ notification.content }}
+                    </a>
+                    <small>{{ notification.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                    {% if not notification.is_read %}
+                        <form method="POST" action="{{ url_for('mark_notification_read', notification_id=notification.id) }}" style="display: inline;">
+                            <button type="submit" class="mark-as-read">Mark as Read</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No notifications yet.</p>
+        {% endif %}
+    </div>
+    <a href="{{ url_for('feed') }}">Go to Home Page</a>
+</body>
+</html>

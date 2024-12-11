@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+    <div style="max-width: 800px; margin: 20px auto; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+        <h2 style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 20px;">{{ live_session.topic }}</h2>
+        <p style="font-size: 16px; margin-bottom: 10px;">
+            <strong style="color: #555;">Date:</strong> <span style="color: #007bff;">{{ live_session.date }}</span>
+        </p>
+        <p style="font-size: 16px; margin-bottom: 10px;">
+            <strong style="color: #555;">Time:</strong> <span style="color: #007bff;">{{ live_session.time }}</span>
+        </p>
+        <p style="font-size: 16px; margin-bottom: 10px;">
+            <strong style="color: #555;">Join Here:</strong> 
+            <a href="{{ live_session.zoom_link }}" target="_blank" style="color: #007bff; text-decoration: none; font-weight: bold;">
+                {{ live_session.zoom_link }}
+            </a>
+        </p>
+    </div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4fc;">
+    <div style="background-color: white; padding: 40px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); width: 350px;">
+        <h2 style="text-align: center; font-size: 24px; color: #333; margin-bottom: 20px;">Sign Up</h2>
+        <form method="POST" action="{{ url_for('signup') }}" style="display: flex; flex-direction: column; gap: 15px;">
+            <!-- First Name -->
+            <input type="text" name="first_name" placeholder="First Name" required 
+                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;">
+            
+            <!-- Last Name -->
+            <input type="text" name="last_name" placeholder="Last Name" required 
+                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;">
+            
+            <!-- Email -->
+            <input type="email" name="email" placeholder="Email" required 
+                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;">
+            
+            <!-- Job Title -->
+            <input type="text" name="job_title" placeholder="Job Title" required 
+                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;">
+            
+            <!-- Technology -->
+            <input type="text" name="technology" placeholder="Technology" required 
+                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;">
+            
+            <!-- Password -->
+            <input type="password" name="password" placeholder="Password" required 
+                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;">
+            
+            <!-- Submit Button -->
+            <button type="submit" 
+                style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s;">
+                Sign Up
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
